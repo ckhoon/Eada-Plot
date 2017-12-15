@@ -21,6 +21,8 @@ public class EadaShowDetails : MonoBehaviour
 	public Avpl.InputKey button_menuCycleLeft;
 	public Avpl.InputKey button_menuSelect;
 	public Avpl.InputKey button_menuSort;
+	public Avpl.InputKey button_menuReset;
+	public Avpl.InputKey button_menuMode;
 	private const float MENU_SELECT_R = 0.0f;
 	private const float MENU_UNSELECT_R = 1.0f;
 
@@ -80,6 +82,10 @@ public class EadaShowDetails : MonoBehaviour
 					txtDetailCanvas.transform.Translate(vDir);
 					txtDetailCanvas.transform.rotation = Avpl.AvplStatic.wandRay.transform.rotation;
 					txtDetailCanvas.transform.Translate(Avpl.AvplStatic.wandRay.transform.up * 0.3f);
+
+					if ( plotter.activeSelf )
+						plotter.GetComponent<EadaPlotter>().TurnAlpha((string)hitObject.GetComponent<EadaData>().colName);
+
 					UIInputTarget[] btns = txtDetailCanvas.GetComponentsInChildren<UIInputTarget>();
 					foreach ( UIInputTarget btn in btns )
 					{
@@ -89,6 +95,8 @@ public class EadaShowDetails : MonoBehaviour
 				}
 				else
 				{
+					if ( plotter.activeSelf )
+						plotter.GetComponent<EadaPlotter>().TurnAlpha("");
 					Debug.Log("hit - " + hit.collider.bounds);
 					Debug.Log("i am hit instead - " + hitObject);
 				}
@@ -100,6 +108,11 @@ public class EadaShowDetails : MonoBehaviour
 					RaycastHits = RaycastHits.OrderByDescending(x => x.Graphic.depth).ToList();
 					plotter.GetComponent<EadaPlotter>().FilterSort(RaycastHits[0].colName, RaycastHits[0].value, RaycastHits[0].greater);
 					RaycastHits[0].OnClick();
+				}
+				else
+				{
+					if ( plotter.activeSelf )
+						plotter.GetComponent<EadaPlotter>().TurnAlpha("");
 				}
 			}
 		}
@@ -141,14 +154,6 @@ public class EadaShowDetails : MonoBehaviour
 		}
 		else if ( button_menuSort.IsToggled() )
 		{
-			if ( plotter.activeSelf )
-			{
-				plotter.GetComponent<EadaPlotter>().ReInitPlot();
-				plotter.GetComponent<EadaPlotter>().ClearPlot();
-				plotter.GetComponent<EadaPlotter>().Plot();
-				plotter.GetComponent<EadaPlotter>().Filter(getTagString());
-			}
-
 			if ( plotterParallel.activeSelf )
 			{
 				RaycastHit hit;
@@ -161,12 +166,17 @@ public class EadaShowDetails : MonoBehaviour
 						plotterParallel.GetComponent<EadaParallel>().SortBy((string)hitObject.GetComponent<EadaData>().colName);
 						plotterParallel.GetComponent<EadaParallel>().Filter(getTagString());
 					}
-					else
-					{
-						Debug.Log("hit - " + hit.collider.bounds);
-						Debug.Log("i am hit instead - " + hitObject);
-					}
 				}
+			}
+		}
+		else if ( button_menuReset.IsToggled() )
+		{
+			if ( plotter.activeSelf )
+			{
+				plotter.GetComponent<EadaPlotter>().ReInitPlot();
+				plotter.GetComponent<EadaPlotter>().ClearPlot();
+				plotter.GetComponent<EadaPlotter>().Plot();
+				plotter.GetComponent<EadaPlotter>().Filter(getTagString());
 			}
 		}
 		else if ( key_plus.IsToggled() )

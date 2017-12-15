@@ -68,7 +68,6 @@ public class EadaParallel : MonoBehaviour {
 
 	public void Filter(string strTags)
 	{
-		//Debug.Log(PointHolder.transform.childCount + " points to edit @" + DateTime.Now);
 		for ( int i = 0; i < PointHolder.transform.childCount; i++ )
 		{
 			if ( !PointHolder.transform.GetChild(i).GetComponent<EadaData>() )
@@ -106,7 +105,6 @@ public class EadaParallel : MonoBehaviour {
 				}
 			}
 		}
-		//Debug.Log("when i exit @" + DateTime.Now);
 	}
 
 	public void SortBy(string colName)

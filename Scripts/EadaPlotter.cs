@@ -16,20 +16,16 @@ public class EadaPlotter : MonoBehaviour
 	private const float maxLng = -66.865886f;
 	private const float minLng = -124.463635f;
 	private const float imageScaling = 593.0f / 948.0f;
-	private const float cubeSize = 0.2f;
-	private const float ColHeightMen = cubeSize;
-	private const float ColHeightWomen = 2 * cubeSize;
-	private const float ColHeightCoed = 3 * cubeSize;
-	private const float ColHeightTotal = 4 * cubeSize;
 	private const float ColColorParti = 0.0167f;
 	private const float ColColorStaff = 0.33f;
 	private const float ColColorRev = 0.64f;
-	private const float cubeSizeMultipler = 2;
 	private const float HIDDEN_LOCATION = 100;
+	private const float FADE = 0.001f;
+	private const float OPAQUE = 0.8f;
 
 	public static class TAGS
 	{
-		public const string 
+		public const string
 			PARTICIPANT = "participant",
 			STAFF = "StaffAndSalaries",
 			REV = "RevenuesAndExpenses",
@@ -55,9 +51,22 @@ public class EadaPlotter : MonoBehaviour
 	private Dictionary<string, float> ColColorH = new Dictionary<string, float>();
 	private Dictionary<string, int> ColRotation = new Dictionary<string, int>();
 
+	private float cubeSize = 0.1f;
+	private float cubeSizeMultipler = 3;
+	//private const float cubeSize = 0.02f;
+	//private const float cubeSizeMultipler = 25;
+	private float ColHeightMen;
+	private float ColHeightWomen;
+	private float ColHeightCoed;
+	private float ColHeightTotal;
+
 	// Use this for initialization
 	void Start()
 	{
+		ColHeightMen = cubeSize;
+		ColHeightWomen = 3 * cubeSize;
+		ColHeightCoed = 5 * cubeSize;
+		ColHeightTotal = 7 * cubeSize;
 		// Set pointlist to results of function Reader with argument inputfile
 		pointList = LoadEadaData.Read(inputfile);
 		columnList = new List<string>(pointList[0].Keys);
@@ -96,7 +105,8 @@ public class EadaPlotter : MonoBehaviour
 					//PointHolder.transform.GetChild(i).Translate(0, 0, HIDDEN_LOCATION);
 				}
 			}
-			else {
+			else
+			{
 				if ( PointHolder.transform.GetChild(i).GetComponent<EadaData>().filtered )
 				{
 					PointHolder.transform.GetChild(i).GetComponent<EadaData>().filtered = false;
@@ -140,12 +150,11 @@ public class EadaPlotter : MonoBehaviour
 	{
 		if ( greater )
 			pointList = pointList.Where(o => Convert.ToSingle(o[colName]) >= Convert.ToSingle(value)).ToList();
-			//pointList = pointList.OrderBy(o => Convert.ToSingle(o[colName])).ToList();
 		else
 			pointList = pointList.Where(o => Convert.ToSingle(o[colName]) <= Convert.ToSingle(value)).ToList();
-		//		pointList = pointList.OrderByDescending(o => Convert.ToSingle(o[colName])).ToList();
 		ClearPlot();
 		Plot();
+		TurnAlpha(colName);
 	}
 
 	public void SortBy(string colName)
@@ -153,6 +162,33 @@ public class EadaPlotter : MonoBehaviour
 		pointList = pointList.OrderBy(o => Convert.ToSingle(o[colName])).ToList();
 		ClearPlot();
 		Plot();
+	}
+
+	public void TurnAlpha(string colName)
+	{
+		for ( int i = 0; i < PointHolder.transform.childCount; i++ )
+		{
+			if ( !PointHolder.transform.GetChild(i).GetComponent<EadaData>() )
+				continue;
+
+			Color currentColor = PointHolder.transform.GetChild(i).GetComponent<Renderer>().material.color;
+			if ( !colName.Equals("") )
+			{
+				if ( !PointHolder.transform.GetChild(i).GetComponent<EadaData>().colName.Equals(colName) )
+				{
+					currentColor.a = FADE;
+				}
+				else
+				{
+					currentColor.a = OPAQUE;
+				}
+			}
+			else
+			{
+				currentColor.a = OPAQUE;
+			}
+			PointHolder.transform.GetChild(i).GetComponent<Renderer>().material.color = currentColor;
+		}
 	}
 
 	public void ClearPlot()
@@ -272,7 +308,7 @@ public class EadaPlotter : MonoBehaviour
 		dataPoint.transform.RotateAround(centerBeforeTranslate, new Vector3(0, 1, 0), ColRotation[colName]);
 
 		Color pointColor = Color.HSVToRGB(ColColorH[colName], 0.5f, pos.y);
-		pointColor.a = 0.8f;
+		pointColor.a = OPAQUE;
 		dataPoint.GetComponent<Renderer>().material.color = pointColor;
 
 		dataPoint.transform.parent = PointHolder.transform;
